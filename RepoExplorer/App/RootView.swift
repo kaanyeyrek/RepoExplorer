@@ -1,0 +1,17 @@
+import SwiftUI
+
+struct RootView: View {
+    var body: some View {
+        TabView {
+            Text("Search")
+                .tabItem { Label("Search", systemImage: "magnifyingglass") }
+
+            Text("Bookmarks")
+                .tabItem { Label("Bookmarks", systemImage: "bookmark") }
+        }
+    }
+}
+
+#Preview {
+    RootView()
+}
