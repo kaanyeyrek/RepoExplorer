@@ -49,9 +49,7 @@ actor DiskCache {
 
 private extension DiskCache {
     func fileURL(for key: String) -> URL {
-        let safeKey = key
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: " ", with: "-")
+        let safeKey = key.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? key
         return directory.appending(path: safeKey + ".json")
     }
 }
