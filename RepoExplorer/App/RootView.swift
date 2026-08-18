@@ -8,17 +8,25 @@
 import SwiftUI
 
 struct RootView: View {
+    let api: GitHubAPIClient
+    let cache: DiskCache
+
     var body: some View {
         TabView {
-            Text("Search")
-                .tabItem { Label("Search", systemImage: "magnifyingglass") }
+            NavigationStack {
+                SearchView(api: api, cache: cache)
+            }
+            .tabItem { Label("Search", systemImage: "magnifyingglass") }
 
-            Text("Bookmarks")
-                .tabItem { Label("Bookmarks", systemImage: "bookmark") }
+            NavigationStack {
+                Text("Bookmarks")
+            }
+            .tabItem { Label("Bookmarks", systemImage: "bookmark") }
         }
     }
 }
 
 #Preview {
-    RootView()
+    RootView(api: GitHubAPIClient(), cache: DiskCache())
+        .environment(BookmarkStore())
 }
