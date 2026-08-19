@@ -52,6 +52,7 @@ struct RepoRow: View {
                 Image(systemName: bookmarks.isBookmarked(repository) ? "bookmark.fill" : "bookmark")
             }
             .buttonStyle(.borderless)
+            .accessibilityLabel(bookmarks.isBookmarked(repository) ? "Remove bookmark" : "Add bookmark")
         }
     }
 }

@@ -9,12 +9,13 @@ import SwiftUI
 
 struct OfflineBanner: View {
     let savedAt: Date
+    let query: String
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 60)) { _ in
             Label(
-                "Offline · showing results from \(savedAt.formatted(.relative(presentation: .named)))",
-                systemImage: "wifi.slash"
+                "Saved “\(query)” results · \(savedAt.formatted(.relative(presentation: .named)))",
+                systemImage: "clock.arrow.circlepath"
             )
             .font(.footnote)
             .frame(maxWidth: .infinity)

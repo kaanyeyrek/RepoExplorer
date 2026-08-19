@@ -12,6 +12,7 @@ import Observation
 @Observable
 final class BookmarkStore {
     private static let storageKey = "bookmarkedRepositories"
+    private static let schemaVersion = 1
 
     private(set) var bookmarks: [Repository] = []
 
@@ -20,8 +21,9 @@ final class BookmarkStore {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         guard let data = defaults.data(forKey: Self.storageKey),
-              let decoded = try? JSONDecoder().decode([Repository].self, from: data) else { return }
-        bookmarks = decoded
+              let envelope = try? JSONDecoder().decode(CacheEnvelope<[Repository]>.self, from: data),
+              envelope.version == Self.schemaVersion else { return }
+        bookmarks = envelope.payload
     }
 
     func isBookmarked(_ repository: Repository) -> Bool {
@@ -40,7 +42,8 @@ final class BookmarkStore {
 
 private extension BookmarkStore {
     func persist() {
-        guard let data = try? JSONEncoder().encode(bookmarks) else { return }
+        let envelope = CacheEnvelope(version: Self.schemaVersion, savedAt: .now, payload: bookmarks)
+        guard let data = try? JSONEncoder().encode(envelope) else { return }
         defaults.set(data, forKey: Self.storageKey)
     }
 }

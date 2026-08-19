@@ -19,7 +19,7 @@ struct SearchView: View {
             .navigationTitle("Repositories")
             .searchable(text: $viewModel.query, prompt: "Search GitHub repositories")
             .task { await viewModel.restoreLastSearch() }
-            .task(id: viewModel.query) {
+            .task(id: viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines)) {
                 guard (try? await Task.sleep(for: .milliseconds(400))) != nil else { return }
                 await viewModel.runSearch()
             }
@@ -51,7 +51,7 @@ private extension SearchView {
                     Task { await viewModel.runSearch() }
                 }
             }
-        case .failed(let message):
+        case .failed(let message) where viewModel.repositories.isEmpty:
             ContentUnavailableView {
                 Label("Something went wrong", systemImage: "exclamationmark.triangle")
             } description: {
@@ -110,12 +110,22 @@ private extension SearchView {
     @ViewBuilder
     var topBanner: some View {
         switch viewModel.phase {
-        case .showingCached(let savedAt):
-            OfflineBanner(savedAt: savedAt)
+        case .showingCached(let savedAt, let cachedQuery):
+            OfflineBanner(savedAt: savedAt, query: cachedQuery)
         case .rateLimited(let resetAt):
             RateLimitBanner(resetAt: resetAt) {
                 Task { await viewModel.runSearch() }
             }
+        case .failed(let message):
+            ErrorBanner(message: message) {
+                Task { await viewModel.runSearch() }
+            }
+        case .loading:
+            ProgressView()
+                .controlSize(.small)
+                .frame(maxWidth: .infinity)
+                .padding(6)
+                .background(.thinMaterial)
         default:
             EmptyView()
         }

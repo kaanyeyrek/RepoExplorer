@@ -33,6 +33,7 @@ final class DetailViewModel {
     }
 
     func loadContributors() async {
+        contributorsState = .loading
         let cacheKey = CacheKey.contributors(repositoryID: repository.id)
         do {
             let contributors = try await api.contributors(
