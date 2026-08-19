@@ -102,11 +102,24 @@ Behaviour I chose, and why:
 **To see it live:** type ~11 distinct queries within a minute (unauthenticated) and watch
 the banner count down. I verified this path by triggering it, not just by reading the headers.
 
+## Tests
+
+`Cmd+U` — or `xcodebuild test -scheme RepoExplorer` — runs **14 Swift Testing cases** in
+three suites, deliberately focused on the decision-heavy logic rather than breadth:
+
+- **API client** (stubbed with `URLProtocol`) — rate-limit detection (403 with
+  `x-ratelimit-remaining: 0` becomes a typed error with a parsed reset date, while a
+  plain 403 stays an HTTP error), `retry-after` parsing, the contributors `204 → []`
+  path, offline mapping, and null-tolerant decoding.
+- **Search view model** (protocol stub) — cross-page dedupe by ID, the 1 000-result
+  ceiling stopping pagination, blank queries never reaching the API, and the rate-limit /
+  offline-fallback state transitions.
+- **Disk cache** — round-trip, corrupted-file self-healing, schema-version invalidation.
+
 ## With more time I would
 
-- **Unit-test the decision-heavy logic** — rate-limit header → typed-error mapping,
-  pagination dedupe + the 1 000-result cap, cache schema-version invalidation. The
-  protocol seam and value-type models were shaped for exactly this.
+- **Broaden test coverage** — UI tests for the offline and rate-limit flows, and
+  cancellation-race coverage; today's 14 unit tests target the decision-heavy core.
 - **Disk-cache avatars.** `AsyncImage` has no persistent store, so images degrade to
   placeholders offline; a small disk-backed image loader would fix that.
 - **Conditional requests (ETag / If-None-Match).** I looked into it and *chose not to*:
@@ -117,9 +130,10 @@ the banner count down. I verified this path by triggering it, not just by readin
 
 ## Honest notes
 
-- The weakest part today is test coverage (none yet) — mitigated by design-for-test
-  seams and by manual verification of the airplane-mode and rate-limit paths on the
-  simulator.
+- The weakest part today is the offline image experience: `AsyncImage` has no persistent
+  store, so avatars degrade to placeholders without a connection. The search cache is
+  also a single last-query snapshot by design — switching between older queries offline
+  only restores the most recent one.
 - Search results deduplicate by repository ID across pages (GitHub's ordering can shift
   between pages), and `canLoadMore` respects GitHub's hard 1 000-result search ceiling to
   avoid guaranteed 422s during infinite scroll.
