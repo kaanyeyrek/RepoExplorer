@@ -22,7 +22,10 @@ struct RootView: View {
             .tabItem { Label("Search", systemImage: "magnifyingglass") }
 
             NavigationStack {
-                Text("Bookmarks")
+                BookmarksView()
+                    .navigationDestination(for: Repository.self) { repository in
+                        DetailView(repository: repository, api: api, cache: cache)
+                    }
             }
             .tabItem { Label("Bookmarks", systemImage: "bookmark") }
         }
