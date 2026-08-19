@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		BB00000000000000000013 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA00000000000000000003 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA00000000000000000002;
+			remoteInfo = RepoExplorer;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		AA0000000000000000000A /* RepoExplorer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RepoExplorer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB0000000000000000000A /* RepoExplorerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepoExplorerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +27,22 @@
 			path = RepoExplorer;
 			sourceTree = "<group>";
 		};
+		BB0000000000000000000B /* RepoExplorerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RepoExplorerTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA0000000000000000000C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB0000000000000000000C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000B /* RepoExplorer */,
+				BB0000000000000000000B /* RepoExplorerTests */,
 				AA0000000000000000000D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000000000000000000A /* RepoExplorer.app */,
+				BB0000000000000000000A /* RepoExplorerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = AA0000000000000000000A /* RepoExplorer.app */;
 			productType = "com.apple.product-type.application";
 		};
+		BB0000000000000000000F /* RepoExplorerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB00000000000000000012 /* Build configuration list for PBXNativeTarget "RepoExplorerTests" */;
+			buildPhases = (
+				BB0000000000000000000D /* Sources */,
+				BB0000000000000000000C /* Frameworks */,
+				BB0000000000000000000E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BB00000000000000000014 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BB0000000000000000000B /* RepoExplorerTests */,
+			);
+			name = RepoExplorerTests;
+			packageProductDependencies = (
+			);
+			productName = RepoExplorerTests;
+			productReference = BB0000000000000000000A /* RepoExplorerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +130,10 @@
 				TargetAttributes = {
 					AA00000000000000000002 = {
 						CreatedOnToolsVersion = 26.6;
+					};
+					BB0000000000000000000F = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = AA00000000000000000002;
 					};
 				};
 			};
@@ -100,12 +152,20 @@
 			projectRoot = "";
 			targets = (
 				AA00000000000000000002 /* RepoExplorer */,
+				BB0000000000000000000F /* RepoExplorerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		AA0000000000000000000F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB0000000000000000000E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +182,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BB0000000000000000000D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BB00000000000000000014 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA00000000000000000002 /* RepoExplorer */;
+			targetProxy = BB00000000000000000013 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AA00000000000000000010 /* Debug */ = {
@@ -218,6 +293,42 @@
 			};
 			name = Release;
 		};
+		BB00000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kaanyeyrek.RepoExplorerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RepoExplorer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RepoExplorer";
+			};
+			name = Debug;
+		};
+		BB00000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kaanyeyrek.RepoExplorerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RepoExplorer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RepoExplorer";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -235,6 +346,15 @@
 			buildConfigurations = (
 				AA00000000000000000012 /* Debug */,
 				AA00000000000000000013 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BB00000000000000000012 /* Build configuration list for PBXNativeTarget "RepoExplorerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB00000000000000000010 /* Debug */,
+				BB00000000000000000011 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
