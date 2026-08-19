@@ -16,7 +16,7 @@ final class SearchViewModel {
         case loading
         case loaded
         case empty
-        case showingCached(savedAt: Date)
+        case showingCached(savedAt: Date, query: String)
         case rateLimited(resetAt: Date?)
         case failed(message: String)
     }
@@ -48,14 +48,21 @@ final class SearchViewModel {
     }
 
     var canLoadMore: Bool {
-        phase == .loaded && repositories.count < reachableResultCount
+        phase == .loaded
+            && repositories.count < reachableResultCount
+            && (currentPage + 1) * GitHubAPIClient.pageSize <= Self.searchResultCap
+    }
+
+    private var currentTrimmedQuery: String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     func restoreLastSearch() async {
         guard query.isEmpty, phase == .idle else { return }
         guard let cached = await cache.load(SearchSnapshot.self, key: CacheKey.lastSearch) else { return }
+        guard query.isEmpty, phase == .idle, !Task.isCancelled else { return }
         repositories = cached.payload.repositories
-        phase = .showingCached(savedAt: cached.savedAt)
+        phase = .showingCached(savedAt: cached.savedAt, query: cached.payload.query)
         query = cached.payload.query
     }
 
@@ -69,11 +76,13 @@ final class SearchViewModel {
             return
         }
 
+        if trimmed == activeQuery, phase == .loaded { return }
+
         phase = .loading
         pagination = .idle
         do {
             let response = try await api.searchRepositories(query: trimmed, page: 1)
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, trimmed == currentTrimmedQuery else { return }
             repositories = deduplicated(response.items)
             activeQuery = trimmed
             currentPage = 1
@@ -83,10 +92,10 @@ final class SearchViewModel {
         } catch is CancellationError {
             return
         } catch let error as APIError {
-            guard !Task.isCancelled else { return }
-            await recover(from: error)
+            guard !Task.isCancelled, trimmed == currentTrimmedQuery else { return }
+            await recover(from: error, query: trimmed)
         } catch {
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, trimmed == currentTrimmedQuery else { return }
             phase = .failed(message: error.localizedDescription)
         }
     }
@@ -98,7 +107,10 @@ final class SearchViewModel {
         pagination = .loading
         do {
             let response = try await api.searchRepositories(query: activeQuery, page: currentPage + 1)
-            guard !Task.isCancelled else { return }
+            guard activeQuery == self.activeQuery, phase == .loaded else {
+                pagination = .idle
+                return
+            }
             repositories = deduplicated(response.items, appendingTo: repositories)
             currentPage += 1
             reachableResultCount = min(response.totalCount, Self.searchResultCap)
@@ -121,14 +133,14 @@ final class SearchViewModel {
 }
 
 private extension SearchViewModel {
-    func recover(from error: APIError) async {
+    func recover(from error: APIError, query: String) async {
         switch error {
         case .rateLimited(let resetAt):
             phase = .rateLimited(resetAt: resetAt)
         case .offline:
             if let cached = await cache.load(SearchSnapshot.self, key: CacheKey.lastSearch) {
                 repositories = cached.payload.repositories
-                phase = .showingCached(savedAt: cached.savedAt)
+                phase = .showingCached(savedAt: cached.savedAt, query: cached.payload.query)
             } else {
                 phase = .failed(message: error.localizedDescription)
             }
