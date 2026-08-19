@@ -134,6 +134,9 @@ four suites, deliberately focused on the decision-heavy logic rather than breadt
   primary path — it becomes worthwhile only with a token.
 - Per-query search cache with eviction; localisation; richer detail (README preview,
   languages breakdown); UI polish passes.
+- **CI, analytics and crash reporting** (kept out per the brief): a PR pipeline running
+  the test suite, plus Crashlytics-style crash monitoring, would be my first
+  production-readiness additions.
 
 ## Honest notes
 
