@@ -15,6 +15,9 @@ struct RootView: View {
         TabView {
             NavigationStack {
                 SearchView(api: api, cache: cache)
+                    .navigationDestination(for: Repository.self) { repository in
+                        DetailView(repository: repository, api: api, cache: cache)
+                    }
             }
             .tabItem { Label("Search", systemImage: "magnifyingglass") }
 
