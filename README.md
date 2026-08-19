@@ -149,4 +149,8 @@ four suites, deliberately focused on the decision-heavy logic rather than breadt
   dedicated bookmark model with migration is a "with more time" item.
 - Search results deduplicate by repository ID across pages (GitHub's ordering can shift
   between pages), and `canLoadMore` respects GitHub's hard 1 000-result search ceiling to
-  avoid guaranteed 422s during infinite scroll.
+  avoid guaranteed 422s during infinite scroll. The guard is deliberately conservative:
+  it stops before any page that could cross the ceiling, which forfeits the final partial
+  page (results ~991-1 000) in exchange for never risking a 422.
+- Contributors load once per detail view model; returning to an already-loaded detail
+  (tab switches included) does not re-spend the 60/hour core budget.

@@ -79,4 +79,17 @@ struct DetailViewModelTests {
 
         #expect(viewModel.contributorsState == .rateLimited(resetAt: reset))
     }
+
+    @Test func reappearAfterSuccessDoesNotRefetch() async {
+        let counter = CallCounter()
+        let viewModel = makeViewModel(cache: makeCache()) { _, _ in
+            await counter.increment()
+            return [self.contributor(id: 1)]
+        }
+
+        await viewModel.loadContributors()
+        await viewModel.loadContributors()
+
+        #expect(await counter.count == 1)
+    }
 }

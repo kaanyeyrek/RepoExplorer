@@ -33,6 +33,13 @@ final class DetailViewModel {
     }
 
     func loadContributors() async {
+        switch contributorsState {
+        case .loaded, .showingCached, .empty:
+            return
+        case .loading, .rateLimited, .failed:
+            break
+        }
+
         contributorsState = .loading
         let cacheKey = CacheKey.contributors(repositoryID: repository.id)
         do {
