@@ -31,9 +31,9 @@ Decisions, with what I turned down:
 
 - **`@Observable` view models, owned via `@State`.** The modern replacement for
   `ObservableObject`/`@StateObject` on an iOS 17 target; views re-render only for
-  properties they actually read. Dependencies (API client, cache) are injected through
-  initialisers behind a `GitHubAPIServing` protocol — that seam exists for testability,
-  not for speculative abstraction.
+  properties they actually read. Dependencies are injected through initialisers; the
+  API client sits behind a `GitHubAPIServing` protocol — that seam exists for
+  testability, not for speculative abstraction.
 - **No networking/architecture libraries.** Two endpoints and one funnel method did not
   justify Alamofire or TCA. *Rejected:* a generic `Endpoint`/router layer — at this size
   it would be structure without benefit.
@@ -64,9 +64,11 @@ Decisions, with what I turned down:
 **Model: cache-then-network, single snapshot.**
 
 - Every successful search persists a snapshot (query + accumulated results) to disk.
-  On a cold offline start the snapshot is restored — including the query text — and
-  marked with an orange *"Offline · showing results from X ago"* banner; the timestamp
-  comes from the cache envelope, so staleness is always visible, not implied.
+  On every cold start the snapshot is restored — including the query text — and labelled
+  *"Saved “query” results · X ago"*; online, the same restore transparently refreshes,
+  offline the labelled snapshot is what you keep. The timestamp and the query both come
+  from the cache envelope, so staleness (and which search you are looking at) is always
+  visible, not implied.
 - Details reachable from that list keep working: the repository itself travels with the
   navigation value, and contributors fall back to their own per-repo cache, labelled
   *"Cached · X ago"*.
@@ -80,8 +82,9 @@ Decisions, with what I turned down:
 
 **The important detail: GitHub has two independent limit pools.** Unauthenticated,
 `/search/*` allows **10 requests/minute**, while core endpoints (contributors) allow
-**60/hour** — tracked separately by GitHub (`x-ratelimit-resource`). The app therefore
-never treats "rate limited" as a global condition: a throttled search shows its countdown
+**60/hour** — GitHub tracks them separately (surfaced in its `x-ratelimit-resource`
+header). The app mirrors that split structurally rather than by parsing that header:
+rate-limit state lives per feature, so it never becomes a global condition: a throttled search shows its countdown
 in the search screen while the detail screen stays fully usable, which also matches the
 brief's requirement that the contributors call fails independently.
 
@@ -104,22 +107,26 @@ the banner count down. I verified this path by triggering it, not just by readin
 
 ## Tests
 
-`Cmd+U` — or `xcodebuild test -scheme RepoExplorer` — runs **14 Swift Testing cases** in
-three suites, deliberately focused on the decision-heavy logic rather than breadth:
+`Cmd+U` — or `xcodebuild test -scheme RepoExplorer` — runs **20 Swift Testing cases** in
+four suites, deliberately focused on the decision-heavy logic rather than breadth:
 
 - **API client** (stubbed with `URLProtocol`) — rate-limit detection (403 with
   `x-ratelimit-remaining: 0` becomes a typed error with a parsed reset date, while a
   plain 403 stays an HTTP error), `retry-after` parsing, the contributors `204 → []`
   path, offline mapping, and null-tolerant decoding.
 - **Search view model** (protocol stub) — cross-page dedupe by ID, the 1 000-result
-  ceiling stopping pagination, blank queries never reaching the API, and the rate-limit /
-  offline-fallback state transitions.
+  ceiling stopping pagination, blank queries never reaching the API, the rate-limit /
+  offline-fallback state transitions, and two race regressions: returning from a detail
+  push must not refetch (and burn rate limit), and a stale in-flight pagination response
+  must be dropped instead of polluting a newer query's results.
+- **Detail view model** — contributors success/empty, and rate-limit with and without a
+  cache to fall back on.
 - **Disk cache** — round-trip, corrupted-file self-healing, schema-version invalidation.
 
 ## With more time I would
 
-- **Broaden test coverage** — UI tests for the offline and rate-limit flows, and
-  cancellation-race coverage; today's 14 unit tests target the decision-heavy core.
+- **Broaden test coverage** — UI tests for the offline and rate-limit flows; today's
+  20 unit tests target the decision-heavy core, including the cancellation races.
 - **Disk-cache avatars.** `AsyncImage` has no persistent store, so images degrade to
   placeholders offline; a small disk-backed image loader would fix that.
 - **Conditional requests (ETag / If-None-Match).** I looked into it and *chose not to*:
@@ -130,10 +137,13 @@ three suites, deliberately focused on the decision-heavy logic rather than bread
 
 ## Honest notes
 
-- The weakest part today is the offline image experience: `AsyncImage` has no persistent
-  store, so avatars degrade to placeholders without a connection. The search cache is
-  also a single last-query snapshot by design — switching between older queries offline
-  only restores the most recent one.
+- The weakest remaining edge is the offline image experience (see "with more time").
+  The search cache is a single last-query snapshot by design — switching between older
+  queries offline only restores the most recent one, and the banner now names the query
+  it is showing so that mismatch is visible rather than silent.
+- Bookmarks persist the repository payload inside the same schema-versioned envelope the
+  disk cache uses; a breaking model change invalidates rather than migrates them — a
+  dedicated bookmark model with migration is a "with more time" item.
 - Search results deduplicate by repository ID across pages (GitHub's ordering can shift
   between pages), and `canLoadMore` respects GitHub's hard 1 000-result search ceiling to
   avoid guaranteed 422s during infinite scroll.
