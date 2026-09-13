@@ -107,7 +107,7 @@ the banner count down. I verified this path by triggering it, not just by readin
 
 ## Tests
 
-`Cmd+U` — or `xcodebuild test -scheme RepoExplorer` — runs **20 Swift Testing cases** in
+`Cmd+U` — or `xcodebuild test -scheme RepoExplorer` — runs **21 Swift Testing cases** in
 four suites, deliberately focused on the decision-heavy logic rather than breadth:
 
 - **API client** (stubbed with `URLProtocol`) — rate-limit detection (403 with
@@ -126,7 +126,7 @@ four suites, deliberately focused on the decision-heavy logic rather than breadt
 ## With more time I would
 
 - **Broaden test coverage** — UI tests for the offline and rate-limit flows; today's
-  20 unit tests target the decision-heavy core, including the cancellation races.
+  21 unit tests target the decision-heavy core, including the cancellation races.
 - **Disk-cache avatars.** `AsyncImage` has no persistent store, so images degrade to
   placeholders offline; a small disk-backed image loader would fix that.
 - **Conditional requests (ETag / If-None-Match).** I looked into it and *chose not to*:
